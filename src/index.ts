@@ -57,9 +57,9 @@ export class MemDBTable {
     this.idxPk[name] = new Map();
     this.logDebug({ msg: `created index ${name}` });
     // populate index if creating after data is added
-    if (this.data.size === 0){
+    if (this.data.size === 0) {
       return this; // allow chaining
-    } 
+    }
     this.data.forEach((row: any) => {
       this._populateIndex(name, row);
     });
@@ -135,9 +135,9 @@ export class MemDBTable {
     const pks = new Map();
     for (const s of idxValues) {
       const pksi = this.idxPk[idxName].get(s);
-      if (!pksi){
+      if (!pksi) {
         continue;
-      } 
+      }
       pksi.forEach((pk: string) => {
         pks.set(pk, this.data.get(pk));
       });
@@ -171,19 +171,26 @@ export class MemDBTable {
   public debug() {
     return {
       data: Array.from(this.data.values()),
+      logs: this.log,
       pks: this.idxPk
     };
   }
 
   // Simple Logging
+  private logMsg(data: ILogMessage) {
+    this.log.push(data);
+    if (this.log.length > 100) {
+      this.log.pop();
+    }
+  }
   private logDebug(data: any) {
-    this.log.push({ ...data, lvl: "DEBUG" });
+    this.logMsg({ ...data, lvl: "DEBUG" });
   }
   private logInfo(data: any) {
-    this.log.push({ ...data, lvl: "INFO" });
+    this.logMsg({ ...data, lvl: "INFO" });
   }
   private logError(data: any) {
-    this.log.push({ ...data, lvl: "ERROR" });
+    this.logMsg({ ...data, lvl: "ERROR" });
   }
   // Data manipulation
   private _extractPk(data: any): string {
@@ -194,12 +201,15 @@ export class MemDBTable {
     const key = _.at(data, cfg.paths)
       .map((item: any) => item.toString())
       .join(".");
+    if (!key) {
+      return;
+    }
     const pk = this._extractPk(data);
     const existing = this.idxPk[idxName].get(key);
     if (del) {
-      if (!existing){
+      if (!existing) {
         return; // ARGH
-      } 
+      }
       // DELETE FROM INDEX
       this.idxPk[idxName].set(
         key,
@@ -214,9 +224,6 @@ export class MemDBTable {
       this.idxPk[idxName].set(key, [...existing, pk]);
     } // else it already exists in index
   }
-  
-
-  
 }
 
 // TODO: CREATE MemDB class which holds multiple tables and can create views across tables

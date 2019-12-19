@@ -1,15 +1,27 @@
 {
   "name": "memdb-ps",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple in memory cache/db with pubsub",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "npm run build && node ./src/examples/example.js",
+    "test": "jest",
+    "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "prepare" : "npm run build",
+    "prepublishOnly" : "npm test && npm run lint",
+    "preversion" : "npm run lint",
+    "version" : "npm run format && git add -A src",
+    "postversion" : "git push && git push --tags"
+  },
+  "jest": {
+    "preset": "ts-jest"
   },
   "keywords": [
     "memory",
@@ -19,8 +31,11 @@
   "author": "Oliver Jackman",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^24.0.24",
     "@types/lodash": "^4.14.149",
+    "jest": "^24.9.0",
     "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.7.3"
